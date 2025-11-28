@@ -355,6 +355,10 @@
   box-shadow: var(--shadow-md);
 }
 
+.icon-btn.danger {
+  color: var(--danger);
+}
+
 .icon-btn.danger:hover {
   background: var(--danger);
   color: white;

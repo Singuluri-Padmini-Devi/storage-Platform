@@ -20,11 +20,33 @@ const AllFolders = () => {
   const [renameFolderId, setRenameFolderId] = useState<string | null>(null)
   const [renameFolderName, setRenameFolderName] = useState('')
   const [deleteFolderId, setDeleteFolderId] = useState<string | null>(null)
-  const [deleteButtonPosition, setDeleteButtonPosition] = useState<{ top: number; left: number } | null>(null)
+  const [deleteFolderName, setDeleteFolderName] = useState<string>('')
+  const [isDeleting, setIsDeleting] = useState(false)
 
   useEffect(() => {
     fetchFolders()
   }, [])
+
+  // Handle ESC key to close delete modal
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && deleteFolderId && !isDeleting) {
+        setDeleteFolderId(null)
+        setDeleteFolderName('')
+      }
+    }
+    
+    if (deleteFolderId) {
+      document.addEventListener('keydown', handleEscape)
+      // Prevent body scroll when modal is open
+      document.body.style.overflow = 'hidden'
+    }
+    
+    return () => {
+      document.removeEventListener('keydown', handleEscape)
+      document.body.style.overflow = 'unset'
+    }
+  }, [deleteFolderId, isDeleting])
 
   const fetchFolders = async () => {
     try {
@@ -67,18 +89,25 @@ const AllFolders = () => {
   const handleDeleteFolder = async () => {
     if (!deleteFolderId) return
 
+    setIsDeleting(true)
     try {
       await folderService.deleteFolder(deleteFolderId)
       setDeleteFolderId(null)
+      setDeleteFolderName('')
       // Refresh the folder list
       await fetchFolders()
-      // Show success message
-      alert('Folder deleted successfully')
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || 'Failed to delete folder'
       alert(errorMessage)
       console.error('Delete error:', error)
+    } finally {
+      setIsDeleting(false)
     }
+  }
+
+  const openDeleteModal = (folder: Folder) => {
+    setDeleteFolderId(folder._id)
+    setDeleteFolderName(folder.name)
   }
 
   const openRenameModal = (folder: Folder) => {
@@ -136,14 +165,7 @@ const AllFolders = () => {
                       </button>
                       <button
                         className="icon-btn danger"
-                        onClick={(e) => {
-                          const rect = e.currentTarget.getBoundingClientRect()
-                          setDeleteButtonPosition({
-                            top: rect.top,
-                            left: rect.left
-                          })
-                          setDeleteFolderId(folder._id)
-                        }}
+                        onClick={() => openDeleteModal(folder)}
                         title="Delete"
                       >
                         🗑️
@@ -230,42 +252,76 @@ const AllFolders = () => {
           </div>
         )}
 
-        {/* Delete Confirmation */}
+        {/* Delete Confirmation Modal */}
         {deleteFolderId && (
           <div 
-            className="modal-overlay" 
+            className="modal-overlay delete-modal-overlay" 
             onClick={() => {
-              setDeleteFolderId(null)
-              setDeleteButtonPosition(null)
+              if (!isDeleting) {
+                setDeleteFolderId(null)
+                setDeleteFolderName('')
+              }
             }}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-modal-title"
+            aria-describedby="delete-modal-description"
           >
             <div 
-              className="modal" 
+              className="modal delete-confirmation-modal" 
               onClick={(e) => e.stopPropagation()}
-              style={deleteButtonPosition ? {
-                position: 'fixed',
-                top: `${Math.max(20, Math.min(deleteButtonPosition.top - 100, window.innerHeight - 300))}px`,
-                left: '50%',
-                transform: 'translateX(-50%)',
-                margin: 0
-              } : {}}
             >
-              <div className="modal-header">
-                <h2>Delete Folder</h2>
-                <button className="close-btn" onClick={() => setDeleteFolderId(null)}>
-                  ×
-                </button>
+              <div className="delete-modal-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="12" r="10" fill="#FEE2E2" stroke="#EF4444" strokeWidth="2"/>
+                  <path d="M12 8V12M12 16H12.01" stroke="#EF4444" strokeWidth="2" strokeLinecap="round"/>
+                  <path d="M8 8L16 16M16 8L8 16" stroke="#EF4444" strokeWidth="1.5" strokeLinecap="round" opacity="0.5"/>
+                </svg>
               </div>
-              <p>Are you sure you want to delete this folder? This action cannot be undone.</p>
-              <div className="modal-footer">
+              
+              <div className="modal-header delete-modal-header">
+                <h2 id="delete-modal-title">Delete Folder</h2>
+              </div>
+              
+              <div className="delete-modal-content" id="delete-modal-description">
+                <p className="delete-warning-text">
+                  Are you sure you want to delete <strong>"{deleteFolderName}"</strong>?
+                </p>
+                <p className="delete-warning-subtext">
+                  This action cannot be undone. All files and sub-folders in this folder will be permanently deleted.
+                </p>
+              </div>
+              
+              <div className="modal-footer delete-modal-footer">
                 <button
                   className="btn btn-secondary"
-                  onClick={() => setDeleteFolderId(null)}
+                  onClick={() => {
+                    setDeleteFolderId(null)
+                    setDeleteFolderName('')
+                  }}
+                  disabled={isDeleting}
                 >
                   Cancel
                 </button>
-                <button className="btn btn-danger" onClick={handleDeleteFolder}>
-                  Delete
+                <button 
+                  className="btn btn-danger delete-confirm-btn" 
+                  onClick={handleDeleteFolder}
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? (
+                    <>
+                      <span className="spinner"></span>
+                      Deleting...
+                    </>
+                  ) : (
+                    <>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                      </svg>
+                      Delete Folder
+                    </>
+                  )}
                 </button>
               </div>
             </div>

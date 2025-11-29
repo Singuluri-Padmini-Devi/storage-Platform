@@ -4,6 +4,7 @@ const File = require("../models/File");
 
 // Generate share link
 const generateShareLink = async (req, res) => {
+  console.log("REQ.BODY:", req.body);
   try {
     const { resourceType, resourceId } = req.body;
 

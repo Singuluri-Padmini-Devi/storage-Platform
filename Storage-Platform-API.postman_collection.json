@@ -1,0 +1,615 @@
+{
+	"info": {
+		"_postman_id": "storage-platform-api-2024",
+		"name": "Storage Platform API",
+		"description": "Full-stack storage platform API with authentication, folders, files, and sharing capabilities. Built with Node.js, Express, and MongoDB.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "register"]
+						},
+						"description": "Register a new admin user account.\n\n**Request Body:**\n- `email` (string, required): User email address\n- `password` (string, required): Password (minimum 6 characters)\n\n**Response:**\n- Returns JWT token and user information"
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "login"]
+						},
+						"description": "Login with email and password to get JWT authentication token.\n\n**Request Body:**\n- `email` (string, required): User email address\n- `password` (string, required): User password\n\n**Response:**\n- Returns JWT token and user information\n- Save the token to use in protected routes"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Current User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/auth/me",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "me"]
+						},
+						"description": "Get current authenticated user information.\n\n**Authentication:** Required (Bearer Token)\n\n**Response:**\n- Returns user ID, email, and role"
+					},
+					"response": []
+				}
+			],
+			"description": "Authentication endpoints for user registration and login."
+		},
+		{
+			"name": "Folders",
+			"item": [
+				{
+					"name": "Get Root Folders",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/folders/root",
+							"host": ["{{base_url}}"],
+							"path": ["api", "folders", "root"]
+						},
+						"description": "Get all root-level folders (folders with no parent).\n\n**Authentication:** Required (Bearer Token)\n\n**Response:**\n- Returns array of root folders"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Folders",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/folders/all",
+							"host": ["{{base_url}}"],
+							"path": ["api", "folders", "all"]
+						},
+						"description": "Get all folders in the system (root and nested).\n\n**Authentication:** Required (Bearer Token)\n\n**Response:**\n- Returns array of all folders"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Folder by ID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/folders/:folderId",
+							"host": ["{{base_url}}"],
+							"path": ["api", "folders", ":folderId"],
+							"variable": [
+								{
+									"key": "folderId",
+									"value": "507f1f77bcf86cd799439011",
+									"description": "Folder ID"
+								}
+							]
+						},
+						"description": "Get a specific folder by its ID.\n\n**Authentication:** Required (Bearer Token)\n\n**Path Parameters:**\n- `folderId` (string, required): MongoDB ObjectId of the folder\n\n**Response:**\n- Returns folder details including path information"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Sub-Folders",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/folders/:folderId/subfolders",
+							"host": ["{{base_url}}"],
+							"path": ["api", "folders", ":folderId", "subfolders"],
+							"variable": [
+								{
+									"key": "folderId",
+									"value": "507f1f77bcf86cd799439011"
+								}
+							]
+						},
+						"description": "Get all sub-folders of a specific folder.\n\n**Authentication:** Required (Bearer Token)\n\n**Path Parameters:**\n- `folderId` (string, required): Parent folder ID\n\n**Response:**\n- Returns array of sub-folders"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Root Contents",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/folders/root/contents",
+							"host": ["{{base_url}}"],
+							"path": ["api", "folders", "root", "contents"]
+						},
+						"description": "Get contents of root folder (folders and files at root level).\n\n**Authentication:** Required (Bearer Token)\n\n**Response:**\n- Returns object with `folders` and `files` arrays"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Folder Contents",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/folders/:folderId/contents",
+							"host": ["{{base_url}}"],
+							"path": ["api", "folders", ":folderId", "contents"],
+							"variable": [
+								{
+									"key": "folderId",
+									"value": "507f1f77bcf86cd799439011"
+								}
+							]
+						},
+						"description": "Get contents of a specific folder (sub-folders and files).\n\n**Authentication:** Required (Bearer Token)\n\n**Path Parameters:**\n- `folderId` (string, required): Folder ID\n\n**Response:**\n- Returns object with `folders`, `files`, `currentFolder`, and `parentFolder`"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Folder",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"My New Folder\",\n  \"parentId\": null\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/folders",
+							"host": ["{{base_url}}"],
+							"path": ["api", "folders"]
+						},
+						"description": "Create a new folder.\n\n**Authentication:** Required (Bearer Token)\n\n**Request Body:**\n- `name` (string, required): Folder name\n- `parentId` (string, optional): Parent folder ID. Set to `null` for root folder\n\n**Response:**\n- Returns created folder with path information"
+					},
+					"response": []
+				},
+				{
+					"name": "Rename Folder",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Renamed Folder\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/folders/:folderId",
+							"host": ["{{base_url}}"],
+							"path": ["api", "folders", ":folderId"],
+							"variable": [
+								{
+									"key": "folderId",
+									"value": "507f1f77bcf86cd799439011"
+								}
+							]
+						},
+						"description": "Rename a folder. Updates the folder name and automatically updates all descendant folder paths.\n\n**Authentication:** Required (Bearer Token)\n\n**Path Parameters:**\n- `folderId` (string, required): Folder ID to rename\n\n**Request Body:**\n- `name` (string, required): New folder name\n\n**Response:**\n- Returns updated folder with new name and path"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Folder",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/folders/:folderId",
+							"host": ["{{base_url}}"],
+							"path": ["api", "folders", ":folderId"],
+							"variable": [
+								{
+									"key": "folderId",
+									"value": "507f1f77bcf86cd799439011"
+								}
+							]
+						},
+						"description": "Delete a folder. The folder must be empty (no sub-folders or files).\n\n**Authentication:** Required (Bearer Token)\n\n**Path Parameters:**\n- `folderId` (string, required): Folder ID to delete\n\n**Response:**\n- Returns success message\n\n**Error:**\n- Returns 400 if folder contains sub-folders or files"
+					},
+					"response": []
+				}
+			],
+			"description": "Folder management endpoints for creating, reading, updating, and deleting folders."
+		},
+		{
+			"name": "Files",
+			"item": [
+				{
+					"name": "Create File",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"document.pdf\",\n  \"folderId\": null,\n  \"fileUrl\": \"https://example.com/file.pdf\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/files",
+							"host": ["{{base_url}}"],
+							"path": ["api", "files"]
+						},
+						"description": "Create a new file entry (metadata).\n\n**Authentication:** Required (Bearer Token)\n\n**Request Body:**\n- `name` (string, required): File name\n- `folderId` (string, optional): Folder ID. Set to `null` for root level\n- `fileUrl` (string, optional): URL to the actual file\n- `size` (number, optional): File size in bytes\n- `mimeType` (string, optional): MIME type (default: application/octet-stream)\n\n**Response:**\n- Returns created file object"
+					},
+					"response": []
+				},
+				{
+					"name": "Rename File",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"renamed-document.pdf\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/files/:fileId",
+							"host": ["{{base_url}}"],
+							"path": ["api", "files", ":fileId"],
+							"variable": [
+								{
+									"key": "fileId",
+									"value": "507f1f77bcf86cd799439011"
+								}
+							]
+						},
+						"description": "Rename a file.\n\n**Authentication:** Required (Bearer Token)\n\n**Path Parameters:**\n- `fileId` (string, required): File ID to rename\n\n**Request Body:**\n- `name` (string, required): New file name\n\n**Response:**\n- Returns updated file object"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete File",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/files/:fileId",
+							"host": ["{{base_url}}"],
+							"path": ["api", "files", ":fileId"],
+							"variable": [
+								{
+									"key": "fileId",
+									"value": "507f1f77bcf86cd799439011"
+								}
+							]
+						},
+						"description": "Delete a file.\n\n**Authentication:** Required (Bearer Token)\n\n**Path Parameters:**\n- `fileId` (string, required): File ID to delete\n\n**Response:**\n- Returns success message"
+					},
+					"response": []
+				}
+			],
+			"description": "File management endpoints for creating, reading, updating, and deleting files."
+		},
+		{
+			"name": "Shares",
+			"item": [
+				{
+					"name": "Generate Share Link",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"resourceType\": \"folder\",\n  \"resourceId\": \"507f1f77bcf86cd799439011\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/shares/generate",
+							"host": ["{{base_url}}"],
+							"path": ["api", "shares", "generate"]
+						},
+						"description": "Generate a public share link for a folder or file.\n\n**Authentication:** Required (Bearer Token)\n\n**Request Body:**\n- `resourceType` (string, required): Either \"folder\" or \"file\"\n- `resourceId` (string, required): ID of the folder or file to share\n\n**Response:**\n- Returns `shareId` and `shareUrl`\n- If share link already exists, returns existing link"
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Share Links",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/shares/my",
+							"host": ["{{base_url}}"],
+							"path": ["api", "shares", "my"]
+						},
+						"description": "Get all active share links created by the current user.\n\n**Authentication:** Required (Bearer Token)\n\n**Response:**\n- Returns array of share link objects"
+					},
+					"response": []
+				},
+				{
+					"name": "Revoke Share Link",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/shares/:shareId",
+							"host": ["{{base_url}}"],
+							"path": ["api", "shares", ":shareId"],
+							"variable": [
+								{
+									"key": "shareId",
+									"value": "abc123def456789012345678901234567890"
+								}
+							]
+						},
+						"description": "Revoke (deactivate) a share link.\n\n**Authentication:** Required (Bearer Token)\n\n**Path Parameters:**\n- `shareId` (string, required): Share link ID to revoke\n\n**Response:**\n- Returns success message"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Public Resource",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/shares/public/:shareId",
+							"host": ["{{base_url}}"],
+							"path": ["api", "shares", "public", ":shareId"],
+							"variable": [
+								{
+									"key": "shareId",
+									"value": "abc123def456789012345678901234567890"
+								}
+							]
+						},
+						"description": "Get a public resource (folder or file) via share link. No authentication required.\n\n**Authentication:** None (Public endpoint)\n\n**Path Parameters:**\n- `shareId` (string, required): Share link ID\n\n**Response:**\n- For folders: Returns folder with sub-folders and files\n- For files: Returns file information\n\n**Error:**\n- Returns 404 if share link not found or expired"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Public Folder",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/shares/public/:shareId/folder/:folderId",
+							"host": ["{{base_url}}"],
+							"path": ["api", "shares", "public", ":shareId", "folder", ":folderId"],
+							"variable": [
+								{
+									"key": "shareId",
+									"value": "abc123def456789012345678901234567890"
+								},
+								{
+									"key": "folderId",
+									"value": "507f1f77bcf86cd799439011"
+								}
+							]
+						},
+						"description": "Get a nested folder within a shared folder tree. No authentication required.\n\n**Authentication:** None (Public endpoint)\n\n**Path Parameters:**\n- `shareId` (string, required): Root share link ID\n- `folderId` (string, required): Nested folder ID\n\n**Response:**\n- Returns folder with sub-folders and files\n- Only accessible if folder is within the shared folder tree\n\n**Error:**\n- Returns 403 if folder is outside shared tree\n- Returns 404 if folder not found"
+					},
+					"response": []
+				}
+			],
+			"description": "Share link endpoints for generating, managing, and accessing public share links."
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:5000",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
+
